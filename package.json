@@ -1,0 +1,26 @@
+{
+  "name": "gitlab-sonar-multi-runner",
+  "version": "0.0.1",
+  "description": "A simple command-line tool for excute sonar docker images with gitlab-ci",
+  "author": "Seungpil Park",
+  "engines": {
+    "node": ">=0.10"
+  },
+  "dependencies": {
+    "async": "^1.4.2",
+    "body-parser": "^1.14.1",
+    "commander": "^2.8.1",
+    "dockerode": "^2.2.3",
+    "express": "^4.13.3",
+    "forever": "^0.15.1",
+    "gitlab": "^1.4.1",
+    "jsonfile": "^2.2.2",
+    "pg": "^4.4.2",
+    "request": "^2.64.0",
+    "shelljs": "^0.5.3",
+    "shortid": "^2.2.2"
+  },
+  "bin": {
+    "gitlab-sonar-multi-runner": "bin/cli.js"
+  }
+}
