@@ -386,7 +386,7 @@ $ sudo docker run \
     -ti \
     -d \
     --restart=always \
-    --name baikal-rethinkdb \
+    --name uengine-rethinkdb \
     rethinkdb
 ```
 4) consul discovery 를 실행합니다.
@@ -401,7 +401,7 @@ $ sudo docker run \
     -p 8400:8400 \
     -p 8500:8500 \
     --restart=always \
-    --name baikal-discovery \
+    --name uengine-discovery \
     progrium/consul -bootstrap -server
 ```
 
@@ -412,7 +412,7 @@ $ sudo docker run \
     -d \
     --hostname=$HOSTNAME \
     --restart=always \
-    --name baikal-proxy \
+    --name uengine-proxy \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -e PORT=2375 \
     ehazlett/docker-proxy:latest
@@ -428,7 +428,7 @@ $ sudo docker run \
     -ti \
     -d \
     --restart=always \
-    --name baikal-swarm-manager \
+    --name uengine-swarm-manager \
     -p 3375:3375 \
     swarm:latest \
     manage --host tcp://0.0.0.0:3375 consul://<consul service ip>:8500
@@ -438,10 +438,10 @@ $ sudo docker run \
     -ti \
     -d \
     --restart=always \
-    --name baikal-swarm-manager \
+    --name uengine-swarm-manager \
     -p 3375:3375 \
     swarm:latest \
-    manage --host tcp://0.0.0.0:3375 consul://172.31.26.45:8500
+    manage --host tcp://0.0.0.0:3375 consul://172.31.20.78:8500
 ```
 
 7) 앞서 생성하였던 Agent 서버들을 등록합니다.
@@ -454,22 +454,39 @@ $ sudo docker run \
     -ti \
     -d \
     --restart=always \
-    --name baikal-swarm-agent1 \
+    --name uengine-swarm-agent1 \
     swarm:latest \
     join --addr <agent ip>:2375 consul://<consul service ip>:8500
+    
+$ sudo docker run \
+    -ti \
+    -d \
+    --restart=always \
+    --name uengine-swarm-agent1 \
+    swarm:latest \
+    join --addr 172.31.23.18:2375 consul://172.31.20.78:8500
+    
+$ sudo docker run \
+    -ti \
+    -d \
+    --restart=always \
+    --name uengine-swarm-agent2 \
+    swarm:latest \
+    join --addr 172.31.20.33:2375 consul://172.31.20.78:8500
+    
 ```
 
 
 8) shipyard ui 를 실행합니다.
 
 ```sh
-docker run \
+$ sudo docker run \
     -ti \
     -d \
     --restart=always \
-    --name baikal-controller \
-    --link baikal-rethinkdb:rethinkdb \
-    --link baikal-swarm-manager:swarm \
+    --name uengine-controller \
+    --link uengine-rethinkdb:rethinkdb \
+    --link uengine-swarm-manager:swarm \
     -p 8080:8080 \
     shipyard/shipyard:latest \
     server \
@@ -625,7 +642,9 @@ sudo -u postgres psql -d template1
 
 # Create a user for GitLab
 # Do not type the 'template1=#', this is part of the prompt
-template1=# CREATE USER git CREATEDB WITH PASSWORD 'qkfka3000';
+template1=# CREATE USER git CREATEDB;
+
+template1=# ALTER USER git WITH PASSWORD 'gosu23546';
 
 # Create the GitLab production database & grant all privileges on database
 template1=# CREATE DATABASE gitlabhq_production OWNER git;
@@ -642,9 +661,8 @@ gitlabhq_production> \q
 
 2) omnibus 패키지 설치
 ```sh
-$ curl https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | sudo bash
+$ curl -sS https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | sudo bash
 
-$ sudo apt-get install gitlab-ce
 ```
 
 3) gitlab 환경설정
@@ -655,6 +673,9 @@ $ sudo vi /etc/gitlab/gitlab.rb
 .
 external_url 'http://git.baikal.io'
 ci_external_url 'http://ci.baikal.io'
+
+user['username'] = "gitlab"
+user['group'] = "gitlab"
 
 # omnibus 패키지에 포함된 postgreql 을 사용하지 않고 별도 설치한 postgresql 을 사용하도록 설정합니다.
 # Disable the built-in Postgres
@@ -667,7 +688,7 @@ gitlab_rails['db_database'] = "gitlabhq_production"
 gitlab_rails['db_host'] = '127.0.0.1'
 gitlab_rails['db_port'] = '5432'
 gitlab_rails['db_username'] = 'git'
-gitlab_rails['db_password'] = 'qkfka3000'
+gitlab_rails['db_password'] = 'gosu23546'
 
 # For GitLab CI, you can use the same parameters:
 gitlab_ci['db_host'] = '127.0.0.1'
@@ -773,7 +794,7 @@ $ sudo npm install forever -g
 
 4) gitlab-sonar-multi-runner 설치
 ```sh
-$ sudo git clone http://git.baikal.io/baikal/gitlab-sonar-multi-runner.git
+$ sudo git clone https://github.com/SeungpilPark/sonar-runner
 
 $ cd gitlab-sonar-multi-runner
 $ sudo npm install -g

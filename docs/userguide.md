@@ -80,7 +80,7 @@ $ cd nodejs
 
 $ vi Dockerfile
 
-# baikal-nodejs
+# uengine-nodejs
 #
 # VERSION               0.0.1
 
@@ -96,16 +96,16 @@ RUN apt-get update && apt-get install -y \
 
 RUN gem install sass
 
-RUN useradd -k /etc/skel -m -s /bin/bash nerpa
+RUN useradd -k /etc/skel -m -s /bin/bash uengine
 RUN chmod u+w /etc/sudoers && \
-	echo "nerpa ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
+	echo "uengine ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers && \
 	chmod u-w /etc/sudoers
 
 RUN curl -sL https://deb.nodesource.com/setup_0.12 | sudo bash -
 RUN sudo apt-get install -y nodejs
 RUN npm install -g bower grunt-cli jshint
 
-CMD ["su","-","nerpa"]
+CMD ["su","-","uengine"]
 ```
 
 위의 작성한 Dockerfile 은 ubuntu 14.04 운영체제에 nodejs 를 인스톨한 이미지를 생성하기 위한 메타파일입니다.
@@ -147,12 +147,12 @@ nodejs latest 4c6e2795a5ee 12 days ago 498.2 MB
 <Registry server:port>/<이미지 이름> 형식으로 이미지를 변환합니다.
 
 예제 : 
-$ sudo docker tag nodejs 172.31.21.144:5000/nodejs
+$ sudo docker tag nodejs 172.31.27.251:5000/nodejs
 
 변환한 이미지를 registry 서버에 저장합니다.
-$ sudo docker push 172.31.21.144:5000/nodejs
+$ sudo docker push 172.31.27.251:5000/nodejs
 
-The push refers to a repository [172.31.21.144:5000/nodejs] (len: 1)
+The push refers to a repository [172.31.27.251:5000/nodejs] (len: 1)
 4c6e2795a5ee: Image already exists 
 .
 .
@@ -166,12 +166,12 @@ Docker manager 서버가 관리하는 모든 Agent 서버로 nodejs 이미지를
 -H tcp://<Docker manager server>:port 옵션을 통해 매니저 서버에 명령을 내릴 수 있습니다.
 
 예제:
-$ sudo docker -H tcp://172.31.26.45:3375 pull 172.31.21.144:5000/nodejs
+$ sudo docker -H tcp://172.31.20.78:3375 pull 172.31.27.251:5000/nodejs
 
 Using default tag: latest
-node1.baikal.io: Pulling 172.31.21.144:5000/nodejs:latest... : downloaded 
-node2.baikal.io: Pulling 172.31.21.144:5000/nodejs:latest... : downloaded 
-node3.baikal.io: Pulling 172.31.21.144:5000/nodejs:latest... : downloaded 
+node1.baikal.io: Pulling 172.31.27.251:5000/nodejs:latest... : downloaded 
+node2.baikal.io: Pulling 172.31.27.251:5000/nodejs:latest... : downloaded 
+node3.baikal.io: Pulling 172.31.27.251:5000/nodejs:latest... : downloaded 
 
 ```
 
@@ -316,7 +316,7 @@ Runner 탭을 클릭하시면 admin-runner-token 을 확인할 수 있습니다.
 
 이제, Runner Server 에서 다음 명령어를 수행합니다.
 ```sh
-sudo gitlab-ci-multi-runner register
+$ sudo gitlab-ci-multi-runner register
 
 Please enter the gitlab-ci coordinator URL (e.g. https://gitlab.com/ci )
 <your gitlab server/ci>
@@ -345,7 +345,7 @@ INFO[0034] fcf5c619 Registering runner... succeeded
 Please enter the executor: shell, docker, docker-ssh, ssh?
 docker
 Please enter the Docker image (eg. ruby:2.1):
-172.31.21.144:5000/nodejs
+172.31.27.251:5000/nodejs
 INFO[0037] Runner registered successfully. Feel free to start it, but if it's
 running already the config should be automatically reloaded!
 ```
@@ -365,7 +365,7 @@ concurrent = 4
   limit = 1
   executor = "docker"
   [runners.docker]
-    image = "172.31.21.144:5000/nodejs"
+    image = "172.31.27.251:5000/nodejs"
     privileged = false
     volumes = ["/cache"]
 ```
@@ -381,8 +381,8 @@ concurrent = 4
   limit = 0
   executor = "docker"
   [runners.docker]
-    host = "tcp://172.31.26.45:3375"
-    image = "172.31.21.144:5000/nodejs"
+    host = "tcp://172.31.20.78:3375"
+    image = "172.31.27.251:5000/nodejs"
     privileged = false
     disable_cache = true
     volumes = ["/cache"]
@@ -508,6 +508,10 @@ $ sudo docker run -i -t --name sonar-runner ubuntu:14.04 /bin/bash
 
 root@a76daf1b3bdd:/# cd
 
+root@a76daf1b3bdd:/# sudo apt-get install git
+
+root@a76daf1b3bdd:/# sudo apt-get install openjdk-7-jdk
+
 root@a76daf1b3bdd:~# sudo apt-get install wget vim
 
 root@a76daf1b3bdd:~# wget http://repo1.maven.org/maven2/org/codehaus/sonar/runner/sonar-runner-dist/2.4/sonar-runner-dist-2.4.zip
@@ -588,14 +592,13 @@ $ sudo docker push <Registry Server>:5000/sonar-runner
 $ sudo docker -H tcp://<Manager Server>:3375 pull <Registry Server>:5000/sonar-runner
 
 
-
 생성한 이미지를 Docker cluster에 배포합니다 예제:
 
-$ sudo docker tag sonar-runner 172.31.21.144:5000/sonar-runner
+$ sudo docker tag sonar-runner 172.31.27.251:5000/sonar-runner
 
-$ sudo docker push 172.31.21.144:5000/sonar-runner
+$ sudo docker push 172.31.27.251:5000/sonar-runner
 
-$ sudo docker -H tcp://172.31.26.45:3375 pull 172.31.21.144:5000/sonar-runner
+$ sudo docker -H tcp://172.31.20.78:3375 pull 172.31.27.251:5000/sonar-runner
 ```
 
 
@@ -612,32 +615,32 @@ $ vi conf/config.json
 
 예제 :
 {
-  "sonar.host.url": "http://sonar.baikal.io:9100",
+  "sonar.host.url": "http://52.79.127.93:9100",
   "sonar.jdbc.username": "sonar",
   "sonar.jdbc.password": "sonar",
   "sonar.jdbc.url": "jdbc:mysql://sonar.baikal.io:3306/sonar?useUnicode=true&characterEncoding=utf8&rewriteBatchedStatements=true&useConfigs=maxPerformance",
   "sonar.login": "admin",
   "sonar.password": "admin",
-  "docker.tcp.host": "tcp://172.31.26.45:3375",
-  "docker.http.host": "http://master.baikal.io",
+  "docker.tcp.host": "tcp://172.31.20.78:3375",
+  "docker.http.host": "http://172.31.20.78",
   "docker.http.port": 3375,
-  "docker.image": "172.31.21.144:5000/sonar-runner",
+  "docker.image": "172.31.27.251:5000/sonar-runner",
   "gitlab.user": "root",
-  "gitlab.pass": "qkfka3000",
-  "gitlab.url": "http://git.baikal.io",
-  "gitlab.token": "Cvs--jaL5NyN7Z-A-bKQ",
-  "gitlab.ci.url": "http://ci.baikal.io",
-  "gitlab.ci.token": "80c04cfdf2369af7b00b",
+  "gitlab.pass": "gosu23546",
+  "gitlab.url": "http://52.79.117.56",
+  "gitlab.token": "ExJgyVxGJv9tFgCDFL4w",
+  "gitlab.ci.url": "http://52.79.117.56",
+  "gitlab.ci.token": "Aijj4PmCKztTJcX2od6X",
   "gitlab.ci.dbname": "gitlabhq_production",
   "gitlab.ci.db.username": "git",
-  "gitlab.ci.db.pass": "qkfka3000",
+  "gitlab.ci.db.pass": "gosu23546",
   "gitlab.ci.db.port": "5432",
-  "gitlab.ci.db.host": "ci.baikal.io",
-  "logdir": "/Users/lecle/IdeaProjects/gitlab-sonar-multi-runner/logs",
+  "gitlab.ci.db.host": "52.79.117.56",
+  "logdir": "/usr/lib/node_modules/gitlab-sonar-multi-runner/logs",
   "maxjob": 4,
   "jobInterval": 3000,
   "listen.port": 9010,
-  "listen.host": "runner.baikal.io"
+  "listen.host": "52.79.38.63"
 }
 
 ```
